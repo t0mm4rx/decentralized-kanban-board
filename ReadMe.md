@@ -43,6 +43,7 @@ The ERC-20 will be sent from this contract. All the funds used as rewards should
 - **name**: string const, name of the project
 - **voteMin**: uint const, the minimal number of votes to consider a task as done
 - **rewardAddress**: address const, the address of the ERC-20 used to reward the assignees
+- **owner**: address const, the deployer of this contract and admin
 
 - **tasks**: array of the tasks
 - **users**: array of the users who have access to this project

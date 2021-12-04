@@ -44,16 +44,17 @@ describe("Starting Test", function () {
       const numberOfVote = await project.getNumberOfVotes(taskId);
       expect(numberOfVote.toNumber()).to.equal(1);
     });
-
-
     it("It should value vote the task", async function () {
       await project.createTask('name', 'description', 'category');
       const tasks = await project.getTasks();
       const taskId = tasks[0][0].toNumber();
-      await project.voteTaskDone(taskId);
-      const numberOfVote = await project.getNumberOfVotes(taskId);
-      expect(numberOfVote.toNumber()).to.equal(1);
+      await project.voteTaskValue(taskId, 1000);
+      await project.voteTaskValue(taskId, 2000);
+      const res = await project.getCurrentTaskValue(taskId);
+      console.log(res)
     });
+
+
 
   })
 });

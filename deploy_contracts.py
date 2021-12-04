@@ -6,7 +6,7 @@ print("Compiling the contracts...")
 os.system("cd backend && npx hardhat compile")
 
 factoryBuild = json.load(open("./backend/artifacts/contracts/Factory.sol/Factory.json"))
-projectBuild = json.load(open("./backend/artifacts/contracts/Factory.sol/Factory.json"))
+projectBuild = json.load(open("./backend/artifacts/contracts/Factory.sol/Project.json"))
 
 print("Copying new ABIs in the frontend...")
 json.dump("./frontend/src/assets/factory.json", open(factoryBuild['abi'], "w+"))

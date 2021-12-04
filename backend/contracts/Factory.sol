@@ -21,19 +21,27 @@ contract Factory {
             }
         }
         address[] memory userProjects = new address[](numberOfProjects);
+        uint256 counter = 0;
         for (uint256 i = 0; i < projects.length; i++) {
             Project projectTmp = Project(projects[i]);
-            uint256 counter = 0;
             if (projectTmp.isUser(msg.sender)) {
-                userProjects[counter] = projects[i];
-                counter++;
+                userProjects[counter++] = projects[i];
             }
         }
         return userProjects;
     }
 
-    function createNewProject() public returns (address _newContract) {
-        Project newProject = new Project(msg.sender);
+    function createNewProject(
+        string calldata _name,
+        uint256 _voteMin,
+        address _tokenContract
+    ) public returns (address _newContract) {
+        Project newProject = new Project(
+            msg.sender,
+            _name,
+            _voteMin,
+            _tokenContract
+        );
         projects.push(address(newProject));
         return address(newProject);
     }

@@ -1,4 +1,3 @@
-//SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
@@ -11,12 +10,17 @@ contract Project {
     address public owner;
     uint256 private taskId = 0;
     Task[] public tasks;
-    mapping(uint256 => bool) doneVote;
+    mapping(uint256 => DoneVote[]) doneVote;
     mapping(uint256 => ValueVote[]) valueVote;
 
     struct ValueVote {
         address voterAddress;
         uint256 value;
+    }
+
+    struct DoneVote {
+        address voterAddress;
+        bool idDone;
     }
 
     struct Task {
@@ -55,6 +59,7 @@ contract Project {
         return false;
     }
 
+    //todo set function setVoteMin
     function getTasks() public view returns (Task[] memory projectTasks) {
         Task[] memory projectTasks = new Task[](tasks.length);
         for (uint256 i = 0; i < tasks.length; i++) {
@@ -67,22 +72,43 @@ contract Project {
         string calldata _name,
         string calldata _description,
         string calldata _category
-    ) public OnlyUsers {
+    ) public OnlyUsers returns (uint256) {
         Task memory newTask = Task({
-            id: taskId++,
+            id: taskId,
             name: _name,
             description: _description,
             category: _category,
             assignee: address(0)
         });
         tasks.push(newTask);
+        taskId = taskId + 1;
+        return taskId - 1;
     }
 
-    function isTaskDone(uint256 _index) public {}
+    // function isTaskDone(uint256 _id) public view returns (bool) {
+    //     if (doneVote[_id] >= voteMin) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
+    function getNumberOfVotes(uint256 _taskId) public view returns (uint256) {
+        return doneVote[_taskId].length;
+    }
 
     function addUser(address _userAddress) public {}
 
     function voteTaskValue(uint256 _index, uint256 _value) public {}
 
-    function voteTaskDone(uint256 _index) public {}
+    function voteTaskDone(uint256 _taskId)
+        public
+        returns (DoneVote memory _doneVote)
+    {
+        DoneVote memory newVote = DoneVote({
+            voterAddress: msg.sender,
+            idDone: true
+        });
+        doneVote[_taskId].push(newVote);
+        return newVote;
+    }
 }

@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { getProjects } from "@/services/web3"
+import { getProjects, createProject } from "@/services/web3"
 import Loader from "@/components/Loader"
 import Modal from "@/components/Modal"
 
@@ -52,6 +52,12 @@ export default {
       if (!name) {
         alert("Missing name");
       }
+      createProject(name)
+      .then(() => {
+        this.$toast.success(`Successfully created ${name}`);
+        this.createProjectModal = false;
+      })
+      .catch(this.$toast.error)
     }
   }
 }

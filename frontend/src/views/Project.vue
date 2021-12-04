@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import { getProject, createTask } from "@/services/web3";
+import { getProject, createTask, addUser } from "@/services/web3";
 import { getAddress } from "@/services/wallet";
 import Loader from "@/components/Loader";
 import Modal from "@/components/Modal";
@@ -161,11 +161,16 @@ export default {
       if (!address) {
         return this.$toast.error("Missing address");
       }
+      addUser(this.$route.params.id, address)
+      .then(() => {
+        this.$toast.success("User has been invited");
+        this.addUserModal = false;
+      })
+      .catch(err => this.$toast.error(`Cannot add user: ${err}`));
     }
   },
   computed: {
     categories: function () {
-      console.log("Here", this.project.tasks);
       return [...new Set(this.project.tasks.map(task => task.category))];
     }
   }

@@ -1,4 +1,3 @@
-// import { fakeProject } from "./mockup"
 import * as config from "@/config.json"
 import * as factoryAbi from "@/assets/factory.json"
 import * as projectAbi from "@/assets/project.json"
@@ -23,7 +22,6 @@ export const getProjects = async () => {
 	for (let address of projectHashs) {
 		const project = getProjectContract(address);
 		const name = await project.name().catch(console.error);
-		console.log(address, name);
 		result.push({
 			address, name
 		});
@@ -43,7 +41,8 @@ export const getProject = async (address) => {
 			category: task[3],
 			assignee: parseInt(task[4], 16) !== 0 ? task[4] : null,
 			valueVotes: [],
-			isDone: /* await project.isTaskDone(task[0]) */false
+			isDone: /* await project.isTaskDone(task[0]) */false,
+			id: task[0]
 		});
 	}
 
@@ -53,11 +52,7 @@ export const getProject = async (address) => {
 		owner: await project.owner(),
 		tasks: tasksTreated
 	};
-	// return new Promise((resolve) => {
-	// 	setTimeout(() => {
-	// 		return resolve(fakeProject);
-	// 	}, 600);
-	// });
+
 };
 
 export const createProject = (name, votes, token) => {
@@ -68,4 +63,9 @@ export const createProject = (name, votes, token) => {
 export const createTask = (address, name, description, category) => {
 	const project = getProjectContract(address);
 	return project.createTask(name, description, category);
+}
+
+export const addUser = (address, user) => {
+	const project = getProjectContract(address);
+	return project.addUser(user);
 }

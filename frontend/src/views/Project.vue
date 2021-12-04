@@ -57,7 +57,7 @@
   </Modal>
   <Modal :open="highlightedTask !== null" :onClose="() => highlightedTask = null" style="width: 400px">
     <h2>{{ highlightedTask.name }}</h2>
-    <p>{{ highlightedTask.description }}</p>
+    <p class="highlight-description">{{ highlightedTask.description }}</p>
     <div class="highlight-row">
       <div>
         <span>
@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import { getProject } from "@/services/web3";
+import { getProject, createTask } from "@/services/web3";
 import { getAddress } from "@/services/wallet";
 import Loader from "@/components/Loader";
 import Modal from "@/components/Modal";
@@ -115,7 +115,7 @@ export default {
     }
   },
   mounted: function () {
-    getProject().then(project => this.project = project);
+    getProject(this.$route.params.id).then(project => this.project = project);
   },
   methods: {
     getTasks: function (category) {
@@ -146,10 +146,15 @@ export default {
       if (!name || !category || !description) {
         return this.$toast.error("Missing fields");
       }
-      this.project.tasks.push({
-        name, description, category, isDone: false, valueVotes: [], assignee: null
-      });
-      this.createTaskModal = false;
+      createTask(this.$route.params.id, name, description, category)
+      .then(() => {
+        this.$toast.success("Task created");
+        this.project.tasks.push({
+          name, description, category, isDone: false, valueVotes: [], assignee: null
+        });
+        this.createTaskModal = false;
+      })
+      .catch(err => this.$toast.error(`Unable to create the task: ${err}`));
     },
     addUser: function () {
       const address = document.querySelector("#add-user-address").value;
@@ -160,6 +165,7 @@ export default {
   },
   computed: {
     categories: function () {
+      console.log("Here", this.project.tasks);
       return [...new Set(this.project.tasks.map(task => task.category))];
     }
   }
@@ -268,6 +274,10 @@ h1 a {
       font-size: 1.4em;
     }
   }
+}
+
+.highlight-description {
+  white-space: pre-line;
 }
 
 .primary-text {

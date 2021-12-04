@@ -23,12 +23,20 @@
       <span>Name</span>
       <input type="text" id="create-project-name" placeholder="SpaceX" />
     </div>
+    <div class="label-input-wrapper">
+      <span>Minimum votes</span>
+      <input type="number" id="create-project-votes" placeholder="3" />
+    </div>
+    <div class="label-input-wrapper">
+      <span>ERC-20 reward</span>
+      <input type="text" id="create-project-token" placeholder="0x..." />
+    </div>
     <button class="primary-button" @click="createProject">Create</button>
   </Modal>
 </template>
 
 <script>
-import { getProjects } from "@/services/web3"
+import { getProjects, createProject } from "@/services/web3"
 import Loader from "@/components/Loader"
 import Modal from "@/components/Modal"
 
@@ -49,9 +57,17 @@ export default {
     },
     createProject: function () {
       const name = document.querySelector("#create-project-name").value;
-      if (!name) {
-        alert("Missing name");
+      const votes = document.querySelector("#create-project-votes").value;
+      const token = document.querySelector("#create-project-token").value;
+      if (!name || !votes || !token) {
+        return this.$toast.error("Missing input");
       }
+      createProject(name, votes, token)
+      .then(() => {
+        this.$toast.success(`Successfully created ${name}`);
+        this.createProjectModal = false;
+      })
+      .catch(err => this.$toast.error(`Cannot create project: ${err}`))
     }
   }
 }

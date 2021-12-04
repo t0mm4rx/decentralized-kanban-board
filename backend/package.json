@@ -19,6 +19,11 @@
     "hardhat": "^2.7.0"
   },
   "dependencies": {
-    "bignumber.js": "^9.0.1"
+    "bignumber.js": "^9.0.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "helmet": "^4.6.0",
+    "morgan": "^1.10.0"
   }
 }

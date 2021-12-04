@@ -7,7 +7,7 @@ describe("Starting Test", function () {
   let demoToken;
   beforeEach(async function () {
     //deploy erc20 for testing purpose
-    const DemoToken = await hre.ethers.getContractFactory("Token");
+    const DemoToken = await hre.ethers.getContractFactory("DemoToken");
     demoToken = await DemoToken.deploy();
     await demoToken.deployed();
 

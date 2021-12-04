@@ -40,6 +40,7 @@ describe("Starting Test", function () {
       await project.createTask('name', 'description', 'category');
       const tasks = await project.getTasks();
       const taskId = tasks[0][0].toNumber();
+      await project.voteTaskValue(taskId, 1000);
       await project.voteTaskDone(taskId);
       const numberOfVote = await project.getNumberOfVotes(taskId);
       expect(numberOfVote.toNumber()).to.equal(1);
@@ -62,6 +63,38 @@ describe("Starting Test", function () {
     })
 
 
+    it("Should add an user", async () => {
+      const [, user] = await ethers.getSigners();
+      await project.addUser(user.address);
+      const users = await project.getUsers()
+      expect(users).to.include(user.address);
+    })
+
+    it('Should set the task done', async () => {
+      const [, user1, user2, user3] = await ethers.getSigners();
+      await project.addUser(user1.address);
+      await project.addUser(user2.address);
+      await project.addUser(user3.address);
+      await project.createTask('name', 'description', 'category');
+      const tasks = await project.getTasks();
+      const taskId = tasks[0][0].toNumber();
+      await project.connect(user1).voteTaskValue(taskId, 1000);
+      await project.connect(user1).voteTaskDone(taskId);
+      await project.connect(user2).voteTaskValue(taskId, 1000);
+      await project.connect(user2).voteTaskDone(taskId);
+      await project.connect(user3).voteTaskValue(taskId, 1000);
+      await project.connect(user3).voteTaskDone(taskId);
+      expect(await project.isTaskDone(taskId)).to.equal(true);
+    })
+
+    it('Should claim the task', async () => {
+      const [owner] = await ethers.getSigners();
+      await project.createTask('name', 'description', 'category');
+      const tasks = await project.getTasks();
+      const taskId = tasks[0][0].toNumber();
+      await project.claim(taskId);
+      expect(await project.getTaskAssignee(taskId)).to.equal(owner.address);
+    })
 
   })
 });

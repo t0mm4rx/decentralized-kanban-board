@@ -31,7 +31,6 @@ contract Project {
         address assignee;
     }
 
-    //TODO ASIGN NAME
     constructor(
         address _owner,
         string memory _name,
@@ -68,8 +67,16 @@ contract Project {
         return false;
     }
 
-    //todo set function setVoteMin
-    function getTasks() public view returns (Task[] memory projectTasks) {
+    function claim(uint256 _taskId) public OnlyUsers returns (bool) {
+        require(
+            tasks[_taskId].assignee == address(0),
+            "Task is already claimed"
+        );
+        tasks[_taskId].assignee = msg.sender;
+        return true;
+    }
+
+    function getTasks() public view returns (Task[] memory _projectTasks) {
         Task[] memory projectTasks = new Task[](tasks.length);
         for (uint256 i = 0; i < tasks.length; i++) {
             projectTasks[i] = tasks[i];
@@ -77,7 +84,9 @@ contract Project {
         return projectTasks;
     }
 
-    //todo function claim
+    function getTaskAssignee(uint256 _taskId) public view returns (address) {
+        return tasks[_taskId].assignee;
+    }
 
     function createTask(
         string calldata _name,
@@ -96,12 +105,12 @@ contract Project {
         return taskId - 1;
     }
 
-    // function isTaskDone(uint256 _id) public view returns (bool) {
-    //     if (doneVote[_id] >= voteMin) {
-    //         return true;
-    //     }
-    //     return false;
-    // }
+    function isTaskDone(uint256 _taskId) public view returns (bool) {
+        if (doneVote[_taskId].length >= voteMin) {
+            return true;
+        }
+        return false;
+    }
 
     function getNumberOfVotes(uint256 _taskId) public view returns (uint256) {
         return doneVote[_taskId].length;
@@ -160,6 +169,16 @@ contract Project {
 
     function voteTaskDone(uint256 _taskId) public OnlyUsers returns (bool) {
         bool hasUserVoted = false;
+        bool hasUserVotedValue = false;
+        for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
+            if (valueVote[_taskId][i].voterAddress == msg.sender) {
+                hasUserVotedValue = true;
+            }
+        }
+        require(
+            hasUserVotedValue == true,
+            "User has not voted for the value of the task"
+        );
         for (uint256 i = 0; i < doneVote[_taskId].length; i++) {
             if (doneVote[_taskId][i].voterAddress == msg.sender) {
                 hasUserVoted = true;
@@ -171,6 +190,7 @@ contract Project {
             idDone: true
         });
         doneVote[_taskId].push(newVote);
+        //transfert
         return true;
     }
 }

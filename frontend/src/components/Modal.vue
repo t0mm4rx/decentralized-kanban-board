@@ -31,7 +31,8 @@ export default {
 
 .modal-body {
 	box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-	padding: 20px;
+	padding: 40px;
+	box-sizing: border-box;
 	background-color: white;
 	border-radius: 10px;
 }

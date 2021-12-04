@@ -1,13 +1,13 @@
 <template>
   <h1>
-    <a href="/">Projects</a>
-    > {{ !!project ? project.name : "..." }}
+    <a href="/"><span style="color: rgb(122, 122, 130)">Projects <span style="font-size: 0.7em">></span> </span></a>
+    {{ !!project ? project.name : "..." }}
     <span
     v-if="project !== null"
-    class="header-button"
-    @click="() => addUserModal = true">Add user</span>
+    class="header-button clickable"
+    @click="() => addUserModal = true">+ Add user</span>
     <span
-    class="header-button"
+    class="header-button clickable"
     @click="() => subscribeMailModal = true"
     v-if="project !== null">Subscribe to mail notifications</span></h1>
   <div v-if="project === null" id="project-loader-overlay">
@@ -51,39 +51,37 @@
     </div>
     <div class="label-input-wrapper">
       <span>Description</span>
-      <textarea id="new-task-description" placeholder="This feature needs to follow this requirements..."/>
+      <textarea id="new-task-description" placeholder="This feature needs to follow these requirements..." style="resize: none;"/>
     </div>
     <button class="primary-button" @click="createTask">Create</button>
   </Modal>
-  <Modal :open="highlightedTask !== null" :onClose="() => highlightedTask = null" style="width: 400px">
+  <Modal :open="highlightedTask !== null" :onClose="() => highlightedTask = null" style="width: 500px">
+    <span>{{ highlightedTask.category }}</span>
     <h2>{{ highlightedTask.name }}</h2>
     <p class="highlight-description">{{ highlightedTask.description }}</p>
     <div class="highlight-row">
       <div>
-        <span>
-          Value
-          <span
-          class="primary-text"
-          @click="() => claim(highlightedTask)"
-          v-if="!highlightedTask.value">
-          Vote for value</span>
-          <span
-          class="primary-text"
-          @click="() => claim(highlightedTask)"
-          v-if="highlightedTask.assignee && !highlightedTask.isDone && highlightedTask.value">
-          Vote as done</span>
-        </span>
-        <span>{{ highlightedTask.value ? highlightedTask.value : "To determine" }}</span>
+        <span>Value</span>
+        <span>{{ highlightedTask.value ? highlightedTask.value : "To determine" }}<span
+          class="primary-text clickable"
+          @click="() => voteForValue(highlightedTask)"
+          v-if="!highlightedTask.isDone">
+          Estimate</span></span>
       </div>
       <div>
         <span>
           Assignee
+          </span>
+        <span>{{ highlightedTask.assignee ? formatUser(highlightedTask.assignee) : "Available" }}
           <span
-          class="primary-text"
+      class="primary-text clickable"
+      @click="() => claim(highlightedTask)"
+      v-if="highlightedTask.assignee && !highlightedTask.isDone && highlightedTask.value">
+      Vote as done</span><span
+          class="primary-text clickable"
           v-if="!highlightedTask.assignee"
           @click="() => claim(highlightedTask)">
           Claim</span></span>
-        <span>{{ highlightedTask.assignee ? formatUser(highlightedTask.assignee) : "Available" }}</span>
       </div>
     </div>
   </Modal>
@@ -91,14 +89,16 @@
     <h2>Add a new user to {{ project.name }}</h2>
     <div class="label-input-wrapper">
       <span>Address</span>
-      <input type="text" id="add-user-address" placeholder="0x..." />
+      <div class="input-button-row">
+        <input type="text" id="add-user-address" placeholder="0x..." />
+        <button class="primary-button" @click="addUser">add</button>
+      </div>
     </div>
-    <button class="primary-button" @click="addUser">Add</button>
   </Modal>
 </template>
 
 <script>
-import { getProject, createTask, addUser } from "@/services/web3";
+import { getProject, createTask, addUser, voteForValue } from "@/services/web3";
 import { getAddress } from "@/services/wallet";
 import Loader from "@/components/Loader";
 import Modal from "@/components/Modal";
@@ -161,6 +161,17 @@ export default {
         this.addUserModal = false;
       })
       .catch(err => this.$toast.error(`Cannot add user: ${err}`));
+    },
+    voteForValue: function (task) {
+      const amount = prompt("How much do you think this task is woth?");
+      if (!amount) {
+        return this.$toast.error("Missing value");
+      }
+      voteForValue(this.$route.params.id, task.id, amount)
+      .then(() => {
+        this.$toast.success("Voted!")
+      })
+      .catch(err => this.$toast.error(`Cannot vote: ${err}`));
     }
   },
   computed: {
@@ -261,35 +272,52 @@ h1 a {
 
 .highlight-row {
   display: flex;
+  flex-direction: column;
 
   > div {
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin: 10px;
+    margin: 10px 0px;
+
+    span:nth-child(1) {
+      font-size: 0.8em;
+    }
 
     span:nth-child(2) {
       font-weight: 500;
-      font-size: 1.4em;
+      font-size: 1em;
     }
   }
 }
 
 .highlight-description {
   white-space: pre-line;
+  max-height: 400px;
+  overflow: auto;
 }
 
 .primary-text {
   float: right;
+  padding: 5px;
+}
+
+.clickable {
+  border-radius: 10px;
+  border: 1px solid#eee;
+  color: rgb(94, 99, 223);
+  // color: rgb(122, 122, 130);
+  cursor: pointer;
+}
+
+.clickable:hover {
+  background-color: rgb(232, 233, 255);
 }
 
 .header-button {
   margin-left: 20px;
-  font-size: 0.7em;
-  color: rgb(94, 99, 223);
-  cursor: pointer;
+  font-size: 0.6em;
   padding: 10px;
-  background-color: #eee;
   border-radius: 10px;
 }
 </style>

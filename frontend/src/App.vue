@@ -85,4 +85,17 @@ h1 {
   font-weight: 500;
   cursor: pointer;
 }
+
+.input-button-row {
+  display: flex;
+  
+  > input {
+    flex: 1;
+    box-sizing: border-box;
+  }
+
+  button {
+    margin-left: 10px;
+  }
+}
 </style>

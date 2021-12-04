@@ -71,3 +71,8 @@ export const addUser = (address, user) => {
 	const project = getProjectContract(address);
 	return project.addUser(user);
 }
+
+export const voteForValue = (address, id, amount) => {
+	const project = getProjectContract(address);
+	return project.voteTaskValue(id, amount);
+}

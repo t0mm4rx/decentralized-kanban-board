@@ -31,7 +31,7 @@
       <span>ERC-20 reward</span>
       <input type="text" id="create-project-token" placeholder="0x..." />
     </div>
-    <button class="primary-button" @click="createProject">Create</button>
+    <button class="primary-button" @click="createProject" style="float: right">create</button>
   </Modal>
 </template>
 

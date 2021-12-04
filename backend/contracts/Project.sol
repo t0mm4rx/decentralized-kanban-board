@@ -68,6 +68,8 @@ contract Project {
         return projectTasks;
     }
 
+    //todo function claim
+
     function createTask(
         string calldata _name,
         string calldata _description,
@@ -96,19 +98,51 @@ contract Project {
         return doneVote[_taskId].length;
     }
 
+    function getCurrentTaskValue(uint256 _taskId)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 cumulativeTaskValue = 0;
+        for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
+            cumulativeTaskValue =
+                cumulativeTaskValue +
+                valueVote[_taskId][i].value;
+        }
+        return cumulativeTaskValue / valueVote[_taskId].length;
+    }
+
     function addUser(address _userAddress) public {}
 
-    function voteTaskValue(uint256 _index, uint256 _value) public {}
-
-    function voteTaskDone(uint256 _taskId)
+    function voteTaskValue(uint256 _taskId, uint256 _value)
         public
-        returns (DoneVote memory _doneVote)
+        returns (bool)
     {
+        for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
+            if (valueVote[_taskId][i].voterAddress == msg.sender) {
+                return false;
+            }
+        }
+        ValueVote memory newValueVote = ValueVote({
+            voterAddress: msg.sender,
+            value: _value
+        });
+        valueVote[_taskId].push(newValueVote);
+        return true;
+    }
+
+    function voteTaskDone(uint256 _taskId) public returns (bool) {
+        for (uint256 i = 0; i < doneVote[_taskId].length; i++) {
+            if (doneVote[_taskId][i].voterAddress == msg.sender) {
+                console.log("user already voted");
+                return false;
+            }
+        }
         DoneVote memory newVote = DoneVote({
             voterAddress: msg.sender,
             idDone: true
         });
         doneVote[_taskId].push(newVote);
-        return newVote;
+        return true;
     }
 }

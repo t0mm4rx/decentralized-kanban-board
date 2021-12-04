@@ -12,6 +12,7 @@ body, html {
   padding: 0;
   font-family: "Open Sans";
   font-weight: 300;
+  color: #333;
 }
 
 #app {

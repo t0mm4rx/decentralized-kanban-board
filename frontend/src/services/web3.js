@@ -35,6 +35,7 @@ export const getProject = async (address) => {
 
 	const tasksTreated = [];
 	for (let task of tasks) {
+		const [value, hasVote] = await project.getCurrentTaskValue(task[0]);
 		tasksTreated.push({
 			name: task[1],
 			description: task[2],
@@ -42,7 +43,8 @@ export const getProject = async (address) => {
 			assignee: parseInt(task[4], 16) !== 0 ? task[4] : null,
 			valueVotes: [],
 			isDone: /* await project.isTaskDone(task[0]) */false,
-			id: task[0]
+			id: task[0],
+			value: hasVote ? value : null
 		});
 	}
 

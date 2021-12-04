@@ -24,7 +24,7 @@
       @click="highlightedTask = task">
         <span class="project-board-task-title">{{ task.name }}</span>
         <div class="project-board-task-row">
-          <span>{{ getValue(task) ? getValue(task) : "To determine" }}</span>
+          <span>{{ task.value ? task.value : "To determine" }}</span>
           <span>{{ task.assignee ? formatUser(task.assignee) : "Available" }}</span>
         </div>
         <div v-if="task.isDone" class="project-board-task-badge">
@@ -65,15 +65,15 @@
           <span
           class="primary-text"
           @click="() => claim(highlightedTask)"
-          v-if="!getValue(highlightedTask)">
+          v-if="!highlightedTask.value">
           Vote for value</span>
           <span
           class="primary-text"
           @click="() => claim(highlightedTask)"
-          v-if="highlightedTask.assignee && !highlightedTask.isDone && getValue(highlightedTask)">
+          v-if="highlightedTask.assignee && !highlightedTask.isDone && highlightedTask.value">
           Vote as done</span>
         </span>
-        <span>{{ getValue(highlightedTask) ? getValue(highlightedTask) : "To determine" }}</span>
+        <span>{{ highlightedTask.value ? highlightedTask.value : "To determine" }}</span>
       </div>
       <div>
         <span>
@@ -120,12 +120,6 @@ export default {
   methods: {
     getTasks: function (category) {
       return this.project.tasks.filter(task => task.category === category);
-    },
-    getValue: function (task) {
-      if (!task.valueVotes.length) {
-        return null;
-      }
-      return (task.valueVotes.reduce((a, b) => a + b) / task.valueVotes.length).toFixed(2);
     },
     openNewTaskModal: function (category) {
       if (category) {

@@ -2,8 +2,14 @@
   <h1>
     <a href="/">Projects</a>
     > {{ !!project ? project.name : "..." }}
-    <span class="header-button" @click="() => addUserModal = true">Add user</span>
-    <span class="header-button" @click="() => subscribeMailModal = true">Subscribe to mail notifications</span></h1>
+    <span
+    v-if="project !== null"
+    class="header-button"
+    @click="() => addUserModal = true">Add user</span>
+    <span
+    class="header-button"
+    @click="() => subscribeMailModal = true"
+    v-if="project !== null">Subscribe to mail notifications</span></h1>
   <div v-if="project === null" id="project-loader-overlay">
     <Loader />
   </div>
@@ -60,7 +66,12 @@
           class="primary-text"
           @click="() => claim(highlightedTask)"
           v-if="!getValue(highlightedTask)">
-          Vote</span>
+          Vote for value</span>
+          <span
+          class="primary-text"
+          @click="() => claim(highlightedTask)"
+          v-if="highlightedTask.assignee && !highlightedTask.isDone && getValue(highlightedTask)">
+          Vote as done</span>
         </span>
         <span>{{ getValue(highlightedTask) ? getValue(highlightedTask) : "To determine" }}</span>
       </div>
@@ -268,5 +279,8 @@ h1 a {
   font-size: 0.7em;
   color: rgb(94, 99, 223);
   cursor: pointer;
+  padding: 10px;
+  background-color: #eee;
+  border-radius: 10px;
 }
 </style>

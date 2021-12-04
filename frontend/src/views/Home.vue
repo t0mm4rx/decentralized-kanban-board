@@ -7,27 +7,37 @@
     class="projects-listing-item"
     @click="() => redirectProject(project.address)">
       <h3>{{ project.name }}</h3>
-      <img :src="`https://picsum.photos/200/50?a=${Math.random()}`" />
+      <img :src="`https://picsum.photos/200/50?a=${project.name}`" />
     </div>
-    <div class="projects-listing-item">
+    <div class="projects-listing-item" @click="() => createProjectModal = true">
       <h3>+ Create a new project</h3>
-      <img :src="`https://picsum.photos/200/50?a=${Math.random()}`" />
+      <img :src="`https://picsum.photos/200/50?a=create`" />
     </div>
   </div>
   <div v-if="projects === null" id="projects-loading-overlay">
     <Loader />
   </div>
+  <Modal :open="createProjectModal" :onClose="() => createProjectModal = false" style="width: 400px">
+    <h2>New project</h2>
+    <div class="label-input-wrapper">
+      <span>Name</span>
+      <input type="text" id="create-project-name" placeholder="SpaceX" />
+    </div>
+    <button class="primary-button" @click="createProject">Create</button>
+  </Modal>
 </template>
 
 <script>
 import { getProjects } from "@/services/web3"
 import Loader from "@/components/Loader"
+import Modal from "@/components/Modal"
 
 export default {
-  components: { Loader },
+  components: { Loader, Modal },
   data: function () {
     return {
-      projects: null
+      projects: null,
+      createProjectModal: false
     }
   },
   mounted: function () {
@@ -36,6 +46,12 @@ export default {
   methods: {
     redirectProject: function (address) {
       this.$router.push(`/project/${address}`);
+    },
+    createProject: function () {
+      const name = document.querySelector("#create-project-name").value;
+      if (!name) {
+        alert("Missing name");
+      }
     }
   }
 }

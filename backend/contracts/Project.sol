@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 contract Project {
     string public name;
@@ -29,9 +30,10 @@ contract Project {
         string description;
         string category;
         address assignee;
+        bool isDone;
+        bool isClaimed;
     }
 
-    //TODO ASIGN NAME
     constructor(
         address _owner,
         string memory _name,
@@ -46,12 +48,34 @@ contract Project {
     }
 
     modifier OnlyUsers() {
-        require(isUser(msg.sender));
+        require(isUser(msg.sender), "You are not a user of this project");
+        _;
+    }
+
+    modifier isAssigned(uint256 _taskId) {
+        require(
+            tasks[_taskId].assignee != address(0),
+            "The task is not assigned"
+        );
         _;
     }
 
     modifier OnlyAdmin() {
-        require(owner == msg.sender);
+        require(owner == msg.sender, "You are not admin of this project");
+        _;
+    }
+
+    modifier isDone(uint256 _taskId) {
+        bool hasUserFinishedTask = false;
+        for (uint256 i = 0; i < doneVote[_taskId].length; i++) {
+            if (doneVote[_taskId][i].voterAddress == tasks[_taskId].assignee) {
+                hasUserFinishedTask = true;
+            }
+        }
+        require(
+            hasUserFinishedTask || msg.sender == tasks[_taskId].assignee,
+            "The task is not done yet"
+        );
         _;
     }
 
@@ -68,8 +92,33 @@ contract Project {
         return false;
     }
 
-    //todo set function setVoteMin
-    function getTasks() public view returns (Task[] memory projectTasks) {
+    function getTaskValue(uint256 _taskId)
+        public
+        view
+        returns (uint256 _value)
+    {
+        uint256 cumulativeTaskValue = 0;
+        for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
+            cumulativeTaskValue =
+                cumulativeTaskValue +
+                valueVote[_taskId][i].value;
+        }
+        if (valueVote[_taskId].length == 0) {
+            return 0;
+        }
+        return cumulativeTaskValue / valueVote[_taskId].length;
+    }
+
+    function claimTask(uint256 _taskId) public OnlyUsers returns (bool) {
+        require(
+            tasks[_taskId].assignee == address(0),
+            "Task is already claimed"
+        );
+        tasks[_taskId].assignee = msg.sender;
+        return true;
+    }
+
+    function getTasks() public view returns (Task[] memory _projectTasks) {
         Task[] memory projectTasks = new Task[](tasks.length);
         for (uint256 i = 0; i < tasks.length; i++) {
             projectTasks[i] = tasks[i];
@@ -77,7 +126,9 @@ contract Project {
         return projectTasks;
     }
 
-    //todo function claim
+    function getTaskAssignee(uint256 _taskId) public view returns (address) {
+        return tasks[_taskId].assignee;
+    }
 
     function createTask(
         string calldata _name,
@@ -89,19 +140,18 @@ contract Project {
             name: _name,
             description: _description,
             category: _category,
-            assignee: address(0)
+            assignee: address(0),
+            isDone: false,
+            isClaimed: false
         });
         tasks.push(newTask);
         taskId = taskId + 1;
         return taskId - 1;
     }
 
-    // function isTaskDone(uint256 _id) public view returns (bool) {
-    //     if (doneVote[_id] >= voteMin) {
-    //         return true;
-    //     }
-    //     return false;
-    // }
+    function isTaskDone(uint256 _taskId) public view returns (bool) {
+        return tasks[_taskId].isDone;
+    }
 
     function getNumberOfVotes(uint256 _taskId) public view returns (uint256) {
         return doneVote[_taskId].length;
@@ -127,7 +177,7 @@ contract Project {
         );
     }
 
-    function addUser(address _userAddress) public OnlyAdmin returns (bool) {
+    function addUser(address _userAddress) public OnlyAdmin {
         bool isUserAlreadyRegistered = false;
         for (uint256 i = 0; i < users.length; i++) {
             if (users[i] == _userAddress) {
@@ -138,11 +188,7 @@ contract Project {
         users.push(_userAddress);
     }
 
-    function voteTaskValue(uint256 _taskId, uint256 _value)
-        public
-        OnlyUsers
-        returns (bool)
-    {
+    function voteTaskValue(uint256 _taskId, uint256 _value) public OnlyUsers {
         bool hasUserVoted = false;
         for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
             if (valueVote[_taskId][i].voterAddress == msg.sender) {
@@ -155,11 +201,42 @@ contract Project {
             value: _value
         });
         valueVote[_taskId].push(newValueVote);
-        return true;
     }
 
-    function voteTaskDone(uint256 _taskId) public OnlyUsers returns (bool) {
+    function claimReward(uint256 _taskId) public {
+        require(tasks[_taskId].isDone == true, "The task is not done");
+        require(
+            tasks[_taskId].isClaimed == false,
+            "The task has already been claimed"
+        );
+        require(
+            tasks[_taskId].assignee == msg.sender,
+            "You are not assigned to this task"
+        );
+        IERC20 rewardToken = IERC20(tokenContract);
+        uint256 balance = rewardToken.balanceOf(address(this));
+        uint256 taskValue = getTaskValue(_taskId);
+        require(balance >= taskValue, "The contract balance is too low");
+        rewardToken.transfer(msg.sender, taskValue);
+    }
+
+    function voteTaskDone(uint256 _taskId)
+        public
+        OnlyUsers
+        isAssigned(_taskId)
+        isDone(_taskId)
+    {
         bool hasUserVoted = false;
+        bool hasUserVotedValue = false;
+        for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
+            if (valueVote[_taskId][i].voterAddress == msg.sender) {
+                hasUserVotedValue = true;
+            }
+        }
+        require(
+            hasUserVotedValue == true,
+            "User has not voted for the value of the task"
+        );
         for (uint256 i = 0; i < doneVote[_taskId].length; i++) {
             if (doneVote[_taskId][i].voterAddress == msg.sender) {
                 hasUserVoted = true;
@@ -171,6 +248,8 @@ contract Project {
             idDone: true
         });
         doneVote[_taskId].push(newVote);
-        return true;
+        if (doneVote[_taskId].length >= voteMin) {
+            tasks[_taskId].isDone = true;
+        }
     }
 }

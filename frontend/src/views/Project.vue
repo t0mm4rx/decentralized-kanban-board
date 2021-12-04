@@ -1,5 +1,9 @@
 <template>
-  <h1><a href="/">Projects</a> > {{ !!project ? project.name : "..." }}</h1>
+  <h1>
+    <a href="/">Projects</a>
+    > {{ !!project ? project.name : "..." }}
+    <span class="header-button" @click="() => addUserModal = true">Add user</span>
+    <span class="header-button" @click="() => subscribeMailModal = true">Subscribe to mail notifications</span></h1>
   <div v-if="project === null" id="project-loader-overlay">
     <Loader />
   </div>
@@ -72,6 +76,14 @@
       </div>
     </div>
   </Modal>
+  <Modal :open="addUserModal" :onClose="() => addUserModal = false">
+    <h2>Add a new user to {{ project.name }}</h2>
+    <div class="label-input-wrapper">
+      <span>Address</span>
+      <input type="text" id="add-user-address" placeholder="0x..." />
+    </div>
+    <button class="primary-button" @click="addUser">Add</button>
+  </Modal>
 </template>
 
 <script>
@@ -85,7 +97,9 @@ export default {
     return {
       project: null,
       createTaskModal: false,
-      highlightedTask: null
+      highlightedTask: null,
+      addUserModal: false,
+      subscribeMailModal: false
     }
   },
   mounted: function () {
@@ -124,6 +138,12 @@ export default {
         name, description, category, isDone: false, valueVotes: [], assignee: null
       });
       this.createTaskModal = false;
+    },
+    addUser: function () {
+      const address = document.querySelector("#add-user-address").value;
+      if (!address) {
+        alert("Missing address");
+      }
     }
   },
   computed: {
@@ -159,6 +179,10 @@ h1 a {
   width: 300px;
   min-width: 300px;
   height: 100%;
+
+  h4 {
+    margin-top: 0px;
+  }
 }
 
 .project-board-task {
@@ -236,5 +260,12 @@ h1 a {
 
 .primary-text {
   float: right;
+}
+
+.header-button {
+  margin-left: 20px;
+  font-size: 0.7em;
+  color: rgb(94, 99, 223);
+  cursor: pointer;
 }
 </style>

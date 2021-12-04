@@ -116,6 +116,7 @@ contract Project {
 
     function voteTaskValue(uint256 _taskId, uint256 _value)
         public
+        OnlyUsers
         returns (bool)
     {
         for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
@@ -131,7 +132,7 @@ contract Project {
         return true;
     }
 
-    function voteTaskDone(uint256 _taskId) public returns (bool) {
+    function voteTaskDone(uint256 _taskId) public OnlyUsers returns (bool) {
         for (uint256 i = 0; i < doneVote[_taskId].length; i++) {
             if (doneVote[_taskId][i].voterAddress == msg.sender) {
                 console.log("user already voted");

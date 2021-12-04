@@ -44,15 +44,22 @@ describe("Starting Test", function () {
       const numberOfVote = await project.getNumberOfVotes(taskId);
       expect(numberOfVote.toNumber()).to.equal(1);
     });
+
     it("It should value vote the task", async function () {
       await project.createTask('name', 'description', 'category');
       const tasks = await project.getTasks();
       const taskId = tasks[0][0].toNumber();
       await project.voteTaskValue(taskId, 1000);
-      await project.voteTaskValue(taskId, 2000);
-      const res = await project.getCurrentTaskValue(taskId);
-      console.log(res)
+      const taskValue = await project.getCurrentTaskValue(taskId);
+      expect(taskValue._value.toNumber()).to.equal(1000);
     });
+
+    it("Should add an user", async () => {
+      const [, user] = await ethers.getSigners();
+      await project.addUser(user.address);
+      const users = await project.getUsers()
+      expect(users).to.include(user.address);
+    })
 
 
 

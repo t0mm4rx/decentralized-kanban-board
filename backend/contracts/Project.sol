@@ -6,7 +6,7 @@ contract Project {
     string public name;
     uint256 public voteMin;
     address public tokenContract;
-    address[] public users;
+    address[] private users;
     address public owner;
     uint256 private taskId = 0;
     Task[] public tasks;
@@ -48,6 +48,15 @@ contract Project {
     modifier OnlyUsers() {
         require(isUser(msg.sender));
         _;
+    }
+
+    modifier OnlyAdmin() {
+        require(owner == msg.sender);
+        _;
+    }
+
+    function getUsers() public view returns (address[] memory _users) {
+        return users;
     }
 
     function isUser(address userAddress) public view returns (bool) {
@@ -101,7 +110,7 @@ contract Project {
     function getCurrentTaskValue(uint256 _taskId)
         public
         view
-        returns (uint256)
+        returns (uint256 _value, uint256 numberOfVote)
     {
         uint256 cumulativeTaskValue = 0;
         for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
@@ -109,21 +118,38 @@ contract Project {
                 cumulativeTaskValue +
                 valueVote[_taskId][i].value;
         }
-        return cumulativeTaskValue / valueVote[_taskId].length;
+        if (valueVote[_taskId].length == 0) {
+            return (0, 0);
+        }
+        return (
+            cumulativeTaskValue / valueVote[_taskId].length,
+            valueVote[_taskId].length
+        );
     }
 
-    function addUser(address _userAddress) public {}
+    function addUser(address _userAddress) public OnlyAdmin returns (bool) {
+        bool isUserAlreadyRegistered = false;
+        for (uint256 i = 0; i < users.length; i++) {
+            if (users[i] == _userAddress) {
+                isUserAlreadyRegistered = true;
+            }
+        }
+        require(isUserAlreadyRegistered == false, "User is already registered");
+        users.push(_userAddress);
+    }
 
     function voteTaskValue(uint256 _taskId, uint256 _value)
         public
         OnlyUsers
         returns (bool)
     {
+        bool hasUserVoted = false;
         for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
             if (valueVote[_taskId][i].voterAddress == msg.sender) {
-                return false;
+                hasUserVoted = true;
             }
         }
+        require(hasUserVoted == false, "User has already voted");
         ValueVote memory newValueVote = ValueVote({
             voterAddress: msg.sender,
             value: _value
@@ -133,12 +159,13 @@ contract Project {
     }
 
     function voteTaskDone(uint256 _taskId) public OnlyUsers returns (bool) {
+        bool hasUserVoted = false;
         for (uint256 i = 0; i < doneVote[_taskId].length; i++) {
             if (doneVote[_taskId][i].voterAddress == msg.sender) {
-                console.log("user already voted");
-                return false;
+                hasUserVoted = true;
             }
         }
+        require(hasUserVoted == false, "User has already voted");
         DoneVote memory newVote = DoneVote({
             voterAddress: msg.sender,
             idDone: true

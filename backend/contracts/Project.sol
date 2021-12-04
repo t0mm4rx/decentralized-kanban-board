@@ -9,34 +9,73 @@ contract Project {
     address public tokenContract;
     address[] public users;
     address public owner;
+    uint256 private taskId = 0;
     Task[] public tasks;
+    mapping(uint256 => bool) doneVote;
+    mapping(uint256 => ValueVote[]) valueVote;
+
+    struct ValueVote {
+        address voterAddress;
+        uint256 value;
+    }
+
     struct Task {
+        uint256 id;
         string name;
         string description;
         string category;
         address assignee;
-        mapping(address => bool) doneVote;
-        mapping(address => uint256) valueVote;
     }
 
-    constructor(address _owner) {
+    //TODO ASIGN NAME
+    constructor(
+        address _owner,
+        string memory _name,
+        uint256 _voteMin,
+        address _tokenContract
+    ) {
         owner = _owner;
+        name = _name;
+        voteMin = _voteMin;
+        tokenContract = _tokenContract;
         users.push(_owner);
+    }
+
+    modifier OnlyUsers() {
+        require(isUser(msg.sender));
+        _;
+    }
+
+    function isUser(address userAddress) public view returns (bool) {
+        for (uint256 i = 0; i < users.length; i++) {
+            if (users[i] == userAddress) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getTasks() public view returns (Task[] memory projectTasks) {
+        Task[] memory projectTasks = new Task[](tasks.length);
+        for (uint256 i = 0; i < tasks.length; i++) {
+            projectTasks[i] = tasks[i];
+        }
+        return projectTasks;
     }
 
     function createTask(
         string calldata _name,
         string calldata _description,
         string calldata _category
-    ) public {}
-
-    function isUser(address callerAddress) public view returns (bool) {
-        for (uint256 i = 0; i < users.length; i++) {
-            if (users[i] == callerAddress) {
-                return true;
-            }
-        }
-        return false;
+    ) public OnlyUsers {
+        Task memory newTask = Task({
+            id: taskId++,
+            name: _name,
+            description: _description,
+            category: _category,
+            assignee: address(0)
+        });
+        tasks.push(newTask);
     }
 
     function isTaskDone(uint256 _index) public {}

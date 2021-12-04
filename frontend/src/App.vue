@@ -1,6 +1,38 @@
 <template>
-  <router-view/>
+  <Overlay :open="!metamaskAvailable">
+    <h2>Metamask is not available</h2>
+  </Overlay>
+  <Overlay :open="!connected">
+    <h2>Please connect your wallet</h2>
+  </Overlay>
+  <router-view v-if="connected"/>
 </template>
+
+<script>
+import Overlay from "@/components/Overlay"
+import { isConnected, connect } from "@/services/wallet"
+
+export default {
+  components: { Overlay },
+  data: function () {
+    return {
+      metamaskAvailable: true,
+      connected: false
+    }
+  },
+  mounted: function () {
+    isConnected().then(result => {
+      this.connected = result;
+      if (!result) {
+        connect().then(() => {
+          this.$toast.success("Connected!");
+          this.connected = true;
+        }).catch(this.$toast.error);
+      }
+    });
+  }
+}
+</script>
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;500&display=swap');

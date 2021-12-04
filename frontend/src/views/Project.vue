@@ -88,6 +88,7 @@
 
 <script>
 import { getProject } from "@/services/web3";
+import { getAddress } from "@/services/wallet";
 import Loader from "@/components/Loader";
 import Modal from "@/components/Modal";
 
@@ -124,8 +125,8 @@ export default {
     formatUser: function (address) {
       return address.substring(0, 6) + "..." + address.substring(40)
     },
-    claim: function (task) {
-      task.assignee = window.currentAddress;
+    claim: async function (task) {
+      task.assignee = await getAddress();
     },
     createTask: function () {
       const name = document.querySelector("#new-task-name").value;

@@ -42,7 +42,7 @@ export const getProject = async (address) => {
 			category: task[3],
 			assignee: parseInt(task[4], 16) !== 0 ? task[4] : null,
 			valueVotes: [],
-			isDone: /* await project.isTaskDone(task[0]) */false,
+			isDone: await project.isTaskDone(task[0]),
 			id: task[0],
 			value: hasVote > 0 ? value : null
 		});
@@ -75,4 +75,19 @@ export const addUser = (address, user) => {
 export const voteForValue = (address, id, amount) => {
 	const project = getProjectContract(address);
 	return project.voteTaskValue(id, amount);
+}
+
+export const claimTask = (address, id) => {
+	const project = getProjectContract(address);
+	return project.claimTask(id);
+}
+
+export const voteTaskDone = (address, id) => {
+	const project = getProjectContract(address);
+	return project.voteTaskDone(id);
+}
+
+export const claimReward = (address, id) => {
+	const project = getProjectContract(address);
+	return project.claimReward(id);
 }

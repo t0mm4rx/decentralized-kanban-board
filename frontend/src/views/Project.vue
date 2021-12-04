@@ -5,11 +5,7 @@
     <span
     v-if="project !== null"
     class="header-button clickable"
-    @click="() => addUserModal = true">+ Add user</span>
-    <span
-    class="header-button clickable"
-    @click="() => subscribeMailModal = true"
-    v-if="project !== null">Subscribe to mail notifications</span></h1>
+    @click="() => addUserModal = true">+ Add user</span></h1>
   <div v-if="project === null" id="project-loader-overlay">
     <Loader />
   </div>
@@ -62,11 +58,18 @@
     <div class="highlight-row">
       <div>
         <span>Value</span>
-        <span>{{ highlightedTask.value ? highlightedTask.value : "To determine" }}<span
+        <span>{{ highlightedTask.value ? highlightedTask.value : "To determine" }}
+          <span
           class="primary-text clickable"
           @click="() => voteForValue(highlightedTask)"
           v-if="!highlightedTask.isDone">
-          Estimate</span></span>
+          Estimate</span>
+          <span
+          class="primary-text clickable"
+          @click="() => claimReward(highlightedTask)"
+          v-if="highlightedTask.isDone">
+          Claim reward</span>
+          </span>
       </div>
       <div>
         <span>
@@ -75,7 +78,7 @@
         <span>{{ highlightedTask.assignee ? formatUser(highlightedTask.assignee) : "Available" }}
           <span
       class="primary-text clickable"
-      @click="() => claim(highlightedTask)"
+      @click="() => voteTaskDone(highlightedTask)"
       v-if="highlightedTask.assignee && !highlightedTask.isDone && highlightedTask.value">
       Vote as done</span><span
           class="primary-text clickable"
@@ -98,7 +101,7 @@
 </template>
 
 <script>
-import { getProject, createTask, addUser, voteForValue } from "@/services/web3";
+import { getProject, createTask, addUser, voteForValue, claimTask, voteTaskDone, claimReward } from "@/services/web3";
 import { getAddress } from "@/services/wallet";
 import Loader from "@/components/Loader";
 import Modal from "@/components/Modal";
@@ -131,7 +134,12 @@ export default {
       return address.substring(0, 6) + "..." + address.substring(40)
     },
     claim: async function (task) {
-      task.assignee = await getAddress();
+      claimTask(this.$route.params.id, task.id)
+      .then(async () => {
+        this.$toast.success("Claimed task!");
+        task.assignee = await getAddress();
+      })
+      .catch(err => this.$toast.error(`Cannot claim task: ${err}`))
     },
     createTask: function () {
       const name = document.querySelector("#new-task-name").value;
@@ -172,6 +180,16 @@ export default {
         this.$toast.success("Voted!")
       })
       .catch(err => this.$toast.error(`Cannot vote: ${err}`));
+    },
+    voteTaskDone: function (task) {
+      voteTaskDone(this.$route.params.id, task.id)
+      .then(() => this.$toast.success("Voted this task as done!"))
+      .catch(err => this.$toast.error(`Cannot vote: ${err}`));
+    },
+    claimReward: function (task) {
+      claimReward(this.$route.params.id, task.id)
+      .then(() => this.$toast.success("Reward collected!"))
+      .catch(err => this.$toast.error(`Cannot collect reward: ${err}`));
     }
   },
   computed: {

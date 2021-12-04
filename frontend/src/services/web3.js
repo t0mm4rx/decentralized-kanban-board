@@ -44,7 +44,7 @@ export const getProject = async (address) => {
 			valueVotes: [],
 			isDone: /* await project.isTaskDone(task[0]) */false,
 			id: task[0],
-			value: hasVote ? value : null
+			value: hasVote > 0 ? value : null
 		});
 	}
 

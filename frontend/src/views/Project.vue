@@ -144,7 +144,7 @@ export default {
       const category = document.querySelector("#new-task-category").value;
       const description = document.querySelector("#new-task-description").value;
       if (!name || !category || !description) {
-        return alert("Missing fields");
+        return this.$toast.error("Missing fields");
       }
       this.project.tasks.push({
         name, description, category, isDone: false, valueVotes: [], assignee: null
@@ -154,7 +154,7 @@ export default {
     addUser: function () {
       const address = document.querySelector("#add-user-address").value;
       if (!address) {
-        alert("Missing address");
+        return this.$toast.error("Missing address");
       }
     }
   },

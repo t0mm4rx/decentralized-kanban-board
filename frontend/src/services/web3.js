@@ -13,33 +13,22 @@ export const getFactoryContract = () => {
 };
 
 export const getProjectContract = (address) => {
-	return new ethers.Contract(address, projectAbi.default);
+	return new ethers.Contract(address, projectAbi.default, getProvider().getSigner());
 };
-
-export const test = async () => {
-	const factory = getFactoryContract();
-	// console.log(factory)
-	const res = await factory.getUserProjects().catch(console.error)
-	console.log('res', res);
-}
 
 export const getProjects = async () => {
 	const factory = getFactoryContract();
 	const projectHashs = await factory.getUserProjects();
 	const result = [];
 	for (let address of projectHashs) {
-		// Get name
+		const project = getProjectContract(address);
+		const name = await project.name().catch(console.error);
+		console.log(address, name);
 		result.push({
-			address, name: 'Dust Impact'
+			address, name
 		});
 	}
 	return result;
-	// console.log(projectHashs);
-	// return new Promise((resolve) => {
-	// 	setTimeout(() => {
-	// 		return resolve(fakeProjects);
-	// 	}, 300);
-	// });
 }
 
 export const getProject = (address) => {
@@ -51,8 +40,7 @@ export const getProject = (address) => {
 	});
 };
 
-export const createProject = async (name) => {
-	name;
+export const createProject = (name, votes, token) => {
 	const factory = getFactoryContract();
-	return await factory.createNewProject();
+	return factory.createNewProject(name, votes, token);
 }

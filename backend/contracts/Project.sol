@@ -13,6 +13,7 @@ contract Project {
     Task[] public tasks;
     mapping(uint256 => DoneVote[]) doneVote;
     mapping(uint256 => ValueVote[]) valueVote;
+    mapping(address => string) nickNames;
 
     struct ValueVote {
         address voterAddress;
@@ -79,6 +80,10 @@ contract Project {
         _;
     }
 
+    function getNickName() public view returns (string memory _nickName) {
+        return nickNames[msg.sender];
+    }
+
     function getUsers() public view returns (address[] memory _users) {
         return users;
     }
@@ -90,6 +95,10 @@ contract Project {
             }
         }
         return false;
+    }
+
+    function setNickName(string calldata nickName) public OnlyUsers {
+        nickNames[msg.sender] = nickName;
     }
 
     function getTaskValue(uint256 _taskId)

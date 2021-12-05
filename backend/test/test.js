@@ -132,5 +132,12 @@ describe("Starting Test", function () {
       expect(userBalance.eq(ethers.utils.parseEther("10"))).to.be.true;
     })
 
+    it("Should set a nickname", async () => {
+      const [owner] = await ethers.getSigners();
+      await project.setNickName('Louis');
+      const nickName = await project.getNickName();
+      expect(nickName).to.equal('Louis');
+    })
+
   })
 });

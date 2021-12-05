@@ -28,7 +28,7 @@
       <span
         class="avatar"
         :style="{ backgroundColor: seedColor(address.toLowerCase()).toHex() }"
-      >{{ getName(address) }}</span>
+      >{{ formatAvatar(getName(address)) }}</span>
     </div>
   </div>
   <div v-if="project === null" id="project-loader-overlay">
@@ -52,7 +52,7 @@
             v-if="task.assignee"
             class="avatar"
             :style="{ backgroundColor: seedColor(task.assignee.toLowerCase()).toHex() }"
-          >{{ getName(task.assignee) }}</span>
+          >{{ formatAvatar(getName(task.assignee)) }}</span>
         </div>
         <div v-if="task.isDone" class="project-board-task-badge">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -282,11 +282,15 @@ export default {
         .then(() => this.$toast.success("Set name!"))
         .catch(err => this.$toast.error(`Cannot set name: ${err}`));
     },
+    formatAvatar: function (name) {
+      if (name.startsWith('0x')) return name.substring(0, 3).toLowerCase();
+      return name[0];
+    },
     getName: function (address) {
       if (!this.users)
-        return address.substring(0, 3).toLowerCase();
-      const search = this.users.filter(a => a.address === address);
-      return search[0]?.name.length > 0 ? search[0].name : address.substring(0, 3).toLowerCase();
+        return address
+      const search = this.users.filter(a => a.address.toLowerCase() === address.toLowerCase());
+      return search[0]?.name.length > 0 ? search[0].name : address;
     }, seedColor
   },
   computed: {
@@ -318,12 +322,14 @@ h1 a {
   width: 100%;
 }
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   color: #fff;
   margin-left: 10px;
+  font-size: 18px;
   display: flex;
+  font-weight: 400;
   justify-content: center;
   align-items: center;
 }

@@ -133,11 +133,20 @@ describe("Starting Test", function () {
     })
 
     it("Should set a nickname", async () => {
-      const [owner] = await ethers.getSigners();
       await project.setNickName('Louis');
       const nickName = await project.getNickName();
       expect(nickName).to.equal('Louis');
     })
+
+    it("Should delete a user", async () => {
+      const [_, user1] = await ethers.getSigners();
+      await project.addUser(user1.address);
+      await project.deleteUser(user1.address);
+      const users = await project.getUsers();
+      expect(users.length).to.equal(1);
+
+    })
+
 
   })
 });

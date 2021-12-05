@@ -85,7 +85,21 @@ contract Project {
     }
 
     function getUsers() public view returns (address[] memory _users) {
-        return users;
+        uint256 userCounter = 0;
+        for (uint256 i = 0; i < users.length; i++) {
+            if (users[i] != address(0)) {
+                userCounter++;
+            }
+        }
+        address[] memory filteredUsers = new address[](userCounter);
+        uint256 userIndex = 0;
+        for (uint256 i = 0; i < users.length; i++) {
+            if (users[i] != address(0)) {
+                filteredUsers[userIndex] = users[i];
+                userIndex++;
+            }
+        }
+        return filteredUsers;
     }
 
     function isUser(address userAddress) public view returns (bool) {
@@ -195,6 +209,14 @@ contract Project {
         }
         require(isUserAlreadyRegistered == false, "User is already registered");
         users.push(_userAddress);
+    }
+
+    function deleteUser(address _userAddress) public OnlyAdmin {
+        for (uint256 i = 0; i < users.length; i++) {
+            if (users[i] == _userAddress) {
+                delete users[i];
+            }
+        }
     }
 
     function voteTaskValue(uint256 _taskId, uint256 _value) public OnlyUsers {

@@ -1,20 +1,36 @@
 <template>
-  <h1>
-    <a href="/"><span style="color: rgb(122, 122, 130)">Projects <span style="font-size: 0.7em">></span> </span></a>
-    {{ !!project ? project.name : "..." }}
-    <span
-    v-if="project !== null"
-    class="header-button clickable"
-    @click="() => addUserModal = true">+ Add user</span>
-    <span
-    v-if="project !== null"
-    class="header-button clickable"
-    @click="() => usersModal = true">Users</span>
-    <span
-    v-if="project !== null"
-    class="header-button clickable"
-    @click="setNickname">Set name</span>
+  <div class="header">
+    <h1>
+      <a href="/">
+        <span style="color: rgb(122, 122, 130)">
+          Projects
+          <span style="font-size: 0.7em">></span>
+        </span>
+      </a>
+      {{ !!project ? project.name : "..." }}
+      <span
+        v-if="project !== null"
+        class="header-button clickable"
+        @click="() => addUserModal = true"
+      >+ Add user</span>
+      <span
+        v-if="project !== null"
+        class="header-button clickable"
+        @click="() => usersModal = true"
+      >Users</span>
     </h1>
+    <div class="profile-container">
+      <span
+        v-if="project !== null"
+        class="header-button clickable"
+        @click="setNickname"
+      >Get a nickname</span>
+      <span
+        class="avatar"
+        :style="{ backgroundColor: seedColor(address.toLowerCase()).toHex() }"
+      >{{ getName(address) }}</span>
+    </div>
+  </div>
   <div v-if="project === null" id="project-loader-overlay">
     <Loader />
   </div>
@@ -22,18 +38,29 @@
     <div v-for="category in categories" :key="category" class="project-board-column">
       <h4>{{ category }}</h4>
       <div
-      v-for="task in getTasks(category)"
-      :key="task.name"
-      class="project-board-task"
-      :done="task.isDone"
-      @click="highlightedTask = task">
+        v-for="task in getTasks(category)"
+        :key="task.name"
+        class="project-board-task"
+        :done="task.isDone"
+        @click="highlightedTask = task"
+      >
         <span class="project-board-task-title">{{ task.name }}</span>
         <div class="project-board-task-row">
-          <span>{{ task.value ? task.value : "To determine" }}</span>
-          <span>{{ task.assignee ? formatUser(task.assignee) : "Available" }}</span>
+          <span v-if="task.value" class="task-value">{{ task.value }} tokens</span>
+          <span v-if="!task.value" />
+          <span
+            v-if="task.assignee"
+            class="avatar"
+            :style="{ backgroundColor: seedColor(task.assignee.toLowerCase()).toHex() }"
+          >{{ getName(task.assignee) }}</span>
         </div>
         <div v-if="task.isDone" class="project-board-task-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z" fill="#333"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path
+              d="M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z"
+              fill="#333"
+            />
+          </svg>
         </div>
       </div>
       <div class="project-board-task" @click="() => openNewTaskModal(category)">
@@ -56,49 +83,63 @@
     </div>
     <div class="label-input-wrapper">
       <span>Description</span>
-      <textarea id="new-task-description" placeholder="This feature needs to follow these requirements..." style="resize: none;"/>
+      <textarea
+        id="new-task-description"
+        placeholder="This feature needs to follow these requirements..."
+        style="resize: none;"
+      />
     </div>
     <button class="primary-button" @click="createTask">Create</button>
   </Modal>
-  <Modal :open="highlightedTask !== null" :onClose="() => highlightedTask = null" style="width: 500px">
+  <Modal
+    :open="highlightedTask !== null"
+    :onClose="() => highlightedTask = null"
+    style="width: 500px"
+  >
     <span>{{ highlightedTask.category }}</span>
     <h2>{{ highlightedTask.name }}</h2>
     <p class="highlight-description">{{ highlightedTask.description }}</p>
     <div class="highlight-row">
       <div>
-        <span>Value</span>
-        <span>{{ highlightedTask.value ? highlightedTask.value : "To determine" }}
+        <span :style="{ marginBottom: '10px' }">Value</span>
+        <span>
           <span
-          class="primary-text clickable"
-          @click="() => voteForValue(highlightedTask)"
-          v-if="!highlightedTask.isDone">
-          Estimate</span>
+            v-if="highlightedTask.value"
+            class="task-value-card"
+          >{{ highlightedTask.value }} tokens</span>
+          <span v-if="!highlightedTask.value">To determine</span>
           <span
-          class="primary-text clickable"
-          @click="() => claimReward(highlightedTask)"
-          v-if="highlightedTask.isDone">
-          Claim reward</span>
-          </span>
+            class="clickable modal-button"
+            @click="() => voteForValue(highlightedTask)"
+            v-if="!highlightedTask.isDone"
+          >Estimate</span>
+          <span
+            class="clickable modal-button"
+            @click="() => claimReward(highlightedTask)"
+            v-if="highlightedTask.isDone"
+          >Claim reward</span>
+        </span>
       </div>
       <div>
+        <span>Assignee</span>
         <span>
-          Assignee
-          </span>
-        <span>{{ highlightedTask.assignee ? formatUser(highlightedTask.assignee) : "Available" }}
+          {{ highlightedTask.assignee ? formatUser(highlightedTask.assignee) : "Available" }}
           <span
-      class="primary-text clickable"
-      @click="() => voteTaskDone(highlightedTask)"
-      v-if="highlightedTask.assignee && !highlightedTask.isDone && highlightedTask.value">
-      Vote as done</span><span
-          class="primary-text clickable"
-          v-if="!highlightedTask.assignee"
-          @click="() => claim(highlightedTask)">
-          Claim</span></span>
+            class="clickable modal-button"
+            @click="() => voteTaskDone(highlightedTask)"
+            v-if="highlightedTask.assignee && !highlightedTask.isDone && highlightedTask.value"
+          >Vote as done</span>
+          <span
+            class="clickable modal-button"
+            v-if="!highlightedTask.assignee"
+            @click="() => claim(highlightedTask)"
+          >Claim</span>
+        </span>
       </div>
     </div>
   </Modal>
   <Modal :open="addUserModal" :onClose="() => addUserModal = false">
-    <h2>Add a new user to {{ project.name }}</h2>
+    <h3>Add a new user to {{ project.name }}</h3>
     <div class="label-input-wrapper">
       <span>Address</span>
       <div class="input-button-row">
@@ -107,14 +148,21 @@
       </div>
     </div>
   </Modal>
-  <Modal :open="usersModal" :onClose="() => usersModal = false" style="min-width: 300px">
-    <h2>Users</h2>
+  <Modal :open="usersModal" :onClose="() => usersModal = false" style="min-width: 450px">
+    <span :style="{ fontSize: '1.5em', fontWeight: 'bold' }">Users</span>
     <div id="users-modal-listing" v-if="users">
       <div v-for="user of users" :key="user" class="users-modal-listing-user">
-        <span>{{ formatUser(user.address) }}</span> <span v-if="user.name">({{ user.name }}) <span v-if="user.address === project.owner">(owner)</span></span>
+        <span v-if="!user.name">{{ user.address }}</span>
+        <span v-if="user.name" :style="{ fontWeight: '500' }">
+          {{ user.name }}
+          <span
+            v-if="user.address === project.owner"
+            :style="{ color: 'rgb(94, 99, 223)' }"
+          >(admin)</span>
+        </span>
       </div>
     </div>
-    <Loader v-if="!users"/>
+    <Loader v-if="!users" />
   </Modal>
 </template>
 
@@ -123,6 +171,8 @@ import { getProject, createTask, addUser, voteForValue, claimTask, voteTaskDone,
 import { getAddress } from "@/services/wallet";
 import Loader from "@/components/Loader";
 import Modal from "@/components/Modal";
+import seedColor from 'seed-color';
+
 
 export default {
   components: { Loader, Modal },
@@ -167,11 +217,11 @@ export default {
     },
     claim: async function (task) {
       claimTask(this.$route.params.id, task.id)
-      .then(async () => {
-        this.$toast.success("Claimed task!");
-        task.assignee = await getAddress();
-      })
-      .catch(err => this.$toast.error(`Cannot claim task: ${err}`))
+        .then(async () => {
+          this.$toast.success("Claimed task!");
+          task.assignee = await getAddress();
+        })
+        .catch(err => this.$toast.error(`Cannot claim task: ${err}`))
     },
     createTask: function () {
       const name = document.querySelector("#new-task-name").value;
@@ -181,14 +231,14 @@ export default {
         return this.$toast.error("Missing fields");
       }
       createTask(this.$route.params.id, name, description, category)
-      .then(() => {
-        this.$toast.success("Task created");
-        this.project.tasks.push({
-          name, description, category, isDone: false, valueVotes: [], assignee: null
-        });
-        this.createTaskModal = false;
-      })
-      .catch(err => this.$toast.error(`Unable to create the task: ${err}`));
+        .then(() => {
+          this.$toast.success("Task created");
+          this.project.tasks.push({
+            name, description, category, isDone: false, valueVotes: [], assignee: null
+          });
+          this.createTaskModal = false;
+        })
+        .catch(err => this.$toast.error(`Unable to create the task: ${err}`));
     },
     addUser: function () {
       const address = document.querySelector("#add-user-address").value;
@@ -196,11 +246,11 @@ export default {
         return this.$toast.error("Missing address");
       }
       addUser(this.$route.params.id, address)
-      .then(() => {
-        this.$toast.success("User has been invited");
-        this.addUserModal = false;
-      })
-      .catch(err => this.$toast.error(`Cannot add user: ${err}`));
+        .then(() => {
+          this.$toast.success("User has been invited");
+          this.addUserModal = false;
+        })
+        .catch(err => this.$toast.error(`Cannot add user: ${err}`));
     },
     voteForValue: function (task) {
       const amount = prompt("How much do you think this task is woth?");
@@ -208,20 +258,20 @@ export default {
         return this.$toast.error("Missing value");
       }
       voteForValue(this.$route.params.id, task.id, amount)
-      .then(() => {
-        this.$toast.success("Voted!")
-      })
-      .catch(err => this.$toast.error(`Cannot vote: ${err}`));
+        .then(() => {
+          this.$toast.success("Voted!")
+        })
+        .catch(err => this.$toast.error(`Cannot vote: ${err}`));
     },
     voteTaskDone: function (task) {
       voteTaskDone(this.$route.params.id, task.id)
-      .then(() => this.$toast.success("Voted this task as done!"))
-      .catch(err => this.$toast.error(`Cannot vote: ${err}`));
+        .then(() => this.$toast.success("Voted this task as done!"))
+        .catch(err => this.$toast.error(`Cannot vote: ${err}`));
     },
     claimReward: function (task) {
       claimReward(this.$route.params.id, task.id)
-      .then(() => this.$toast.success("Reward collected!"))
-      .catch(err => this.$toast.error(`Cannot collect reward: ${err}`));
+        .then(() => this.$toast.success("Reward collected!"))
+        .catch(err => this.$toast.error(`Cannot collect reward: ${err}`));
     },
     setNickname: function () {
       const name = prompt("Enter your name");
@@ -229,20 +279,21 @@ export default {
         return this.$toast.error(`Missing input`);
       }
       setNickname(this.$route.params.id, name)
-      .then(() => this.$toast.success("Set name!"))
-      .catch(err => this.$toast.error(`Cannot set name: ${err}`));
+        .then(() => this.$toast.success("Set name!"))
+        .catch(err => this.$toast.error(`Cannot set name: ${err}`));
     },
-    getName: async function (address) {
+    getName: function (address) {
       if (!this.users)
-        return null;
+        return address.substring(0, 3).toLowerCase();
       const search = this.users.filter(a => a.address === address);
-      return search.length > 0 ? search[0] : null;
-    }
+      return search[0]?.name.length > 0 ? search[0].name : address.substring(0, 3).toLowerCase();
+    }, seedColor
   },
   computed: {
     categories: function () {
       return [...new Set(this.project.tasks.map(task => task.category))];
-    }
+    },
+    address: () => window.ethereum ? window.ethereum.selectedAddress : "0x"
   }
 }
 </script>
@@ -266,7 +317,36 @@ h1 a {
   overflow-x: auto;
   width: 100%;
 }
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #fff;
+  margin-left: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.task-value {
+  padding: 10px;
+  background-color: #48bb78;
+  border-radius: 5px;
+  margin: 5px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.7em;
+}
+
+.task-value-card {
+  margin-top: 10px;
+  padding: 5px;
+  background-color: #48bb78;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.7em;
+}
 .project-board-column {
   margin: 20px;
   width: 300px;
@@ -314,7 +394,7 @@ h1 a {
     width: 20px;
     height: 20px;
     border-radius: 100%;
-    background-color: #AFA;
+    background-color: #afa;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -362,6 +442,21 @@ h1 a {
   overflow: auto;
 }
 
+.header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+}
+
+.profile-container {
+  display: flex;
+  margin-right: 20px;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .primary-text {
   float: right;
   padding: 5px;
@@ -369,24 +464,34 @@ h1 a {
 
 .clickable {
   border-radius: 10px;
-  border: 1px solid#eee;
-  color: rgb(94, 99, 223);
-  // color: rgb(122, 122, 130);
+  background-color: #edf2f7;
+  color: #1a202c;
   cursor: pointer;
 }
 
 .clickable:hover {
-  background-color: rgb(232, 233, 255);
+  background-color: #cbd5e0;
+}
+
+.modal-button {
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 0.9em !important;
+  float: right;
 }
 
 .header-button {
   margin-left: 20px;
-  font-size: 0.6em;
+  font-size: 15px;
+  font-weight: 500;
+  color: #2d3748;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 .users-modal-listing-user {
+  border-bottom: 1px solid #edf2f7;
   margin: 10px 0px;
+  padding-bottom: 5px;
 }
 </style>

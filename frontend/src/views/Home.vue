@@ -2,10 +2,11 @@
   <h1>Projects</h1>
   <div v-if="projects !== null" id="projects-listing">
     <div
-    v-for="project in projects"
-    :key="project.name"
-    class="projects-listing-item"
-    @click="() => redirectProject(project.address)">
+      v-for="project in projects"
+      :key="project.name"
+      class="projects-listing-item"
+      @click="() => redirectProject(project.address)"
+    >
       <h3>{{ project.name }}</h3>
       <img :src="`https://picsum.photos/200/50?a=${project.name}`" />
     </div>
@@ -17,7 +18,11 @@
   <div v-if="projects === null" id="projects-loading-overlay">
     <Loader />
   </div>
-  <Modal :open="createProjectModal" :onClose="() => createProjectModal = false" style="width: 400px">
+  <Modal
+    :open="createProjectModal"
+    :onClose="() => createProjectModal = false"
+    style="width: 400px"
+  >
     <h2>New project</h2>
     <div class="label-input-wrapper">
       <span>Name</span>
@@ -63,11 +68,11 @@ export default {
         return this.$toast.error("Missing input");
       }
       createProject(name, votes, token)
-      .then(() => {
-        this.$toast.success(`Successfully created ${name}`);
-        this.createProjectModal = false;
-      })
-      .catch(err => this.$toast.error(`Cannot create project: ${err}`))
+        .then(() => {
+          this.$toast.success(`Successfully created ${name}`);
+          this.createProjectModal = false;
+        })
+        .catch(err => this.$toast.error(`Cannot create project: ${err}`))
     }
   }
 }

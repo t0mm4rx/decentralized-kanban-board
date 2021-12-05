@@ -5,7 +5,7 @@
   <Overlay :open="!connected">
     <h2>Please connect your wallet</h2>
   </Overlay>
-  <router-view v-if="connected"/>
+  <router-view v-if="connected" />
 </template>
 
 <script>
@@ -35,15 +35,16 @@ export default {
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;500&display=swap");
 
-body, html {
+body,
+html {
   width: 100%;
   margin: 0;
   padding: 0;
   font-family: "Open Sans";
   font-weight: 300;
-  color: #333;
+  color: #2d3748;
 }
 
 #app {
@@ -63,7 +64,8 @@ h1 {
   flex-direction: column;
   margin: 10px 0px;
 
-  input, textarea {
+  input,
+  textarea {
     padding: 10px;
     border-radius: 10px;
     border: 1px solid #ccc;
@@ -76,19 +78,21 @@ h1 {
   border: none;
   background-color: rgb(94, 99, 223);
   color: white;
-  border-radius: 10px;
+  border-radius: 5px;
+  width: 100%;
   cursor: pointer;
 }
 
 .primary-text {
-  color: rgb(94, 99, 223);
+  color: #1a202c;
   font-weight: 500;
   cursor: pointer;
 }
 
 .input-button-row {
+  margin-top: 10px;
   display: flex;
-  
+
   > input {
     flex: 1;
     box-sizing: border-box;

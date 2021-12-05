@@ -5,7 +5,16 @@
     <span
     v-if="project !== null"
     class="header-button clickable"
-    @click="() => addUserModal = true">+ Add user</span></h1>
+    @click="() => addUserModal = true">+ Add user</span>
+    <span
+    v-if="project !== null"
+    class="header-button clickable"
+    @click="() => usersModal = true">Users</span>
+    <span
+    v-if="project !== null"
+    class="header-button clickable"
+    @click="setNickname">Set name</span>
+    </h1>
   <div v-if="project === null" id="project-loader-overlay">
     <Loader />
   </div>
@@ -98,10 +107,19 @@
       </div>
     </div>
   </Modal>
+  <Modal :open="usersModal" :onClose="() => usersModal = false" style="min-width: 300px">
+    <h2>Users</h2>
+    <div id="users-modal-listing" v-if="users">
+      <div v-for="user of users" :key="user" class="users-modal-listing-user">
+        <span>{{ formatUser(user.address) }}</span> <span v-if="user.name">({{ user.name }}) <span v-if="user.address === project.owner">(owner)</span></span>
+      </div>
+    </div>
+    <Loader v-if="!users"/>
+  </Modal>
 </template>
 
 <script>
-import { getProject, createTask, addUser, voteForValue, claimTask, voteTaskDone, claimReward } from "@/services/web3";
+import { getProject, createTask, addUser, voteForValue, claimTask, voteTaskDone, claimReward, getUsers, setNickname, getNickname } from "@/services/web3";
 import { getAddress } from "@/services/wallet";
 import Loader from "@/components/Loader";
 import Modal from "@/components/Modal";
@@ -114,11 +132,25 @@ export default {
       createTaskModal: false,
       highlightedTask: null,
       addUserModal: false,
-      subscribeMailModal: false
+      subscribeMailModal: false,
+      usersModal: false,
+      users: null
     }
   },
   mounted: function () {
-    getProject(this.$route.params.id).then(project => this.project = project);
+    getProject(this.$route.params.id).then(project => {
+      this.project = project;
+      getUsers(this.$route.params.id).then(async res => {
+        const users = [];
+        for (let address of res) {
+          const name = await getNickname(this.$route.params.id, address).catch();
+          users.push({
+            address, name: name.length > 0 ? name : name
+          });
+        }
+        this.users = users;
+      }).catch();
+    }).catch(err => this.$toast.error(`Cannot get project: ${err}`));
   },
   methods: {
     getTasks: function (category) {
@@ -190,6 +222,21 @@ export default {
       claimReward(this.$route.params.id, task.id)
       .then(() => this.$toast.success("Reward collected!"))
       .catch(err => this.$toast.error(`Cannot collect reward: ${err}`));
+    },
+    setNickname: function () {
+      const name = prompt("Enter your name");
+      if (!name) {
+        return this.$toast.error(`Missing input`);
+      }
+      setNickname(this.$route.params.id, name)
+      .then(() => this.$toast.success("Set name!"))
+      .catch(err => this.$toast.error(`Cannot set name: ${err}`));
+    },
+    getName: async function (address) {
+      if (!this.users)
+        return null;
+      const search = this.users.filter(a => a.address === address);
+      return search.length > 0 ? search[0] : null;
     }
   },
   computed: {
@@ -337,5 +384,9 @@ h1 a {
   font-size: 0.6em;
   padding: 10px;
   border-radius: 10px;
+}
+
+.users-modal-listing-user {
+  margin: 10px 0px;
 }
 </style>

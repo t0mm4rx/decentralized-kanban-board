@@ -91,3 +91,18 @@ export const claimReward = (address, id) => {
 	const project = getProjectContract(address);
 	return project.claimReward(id);
 }
+
+export const getUsers = (address) => {
+	const project = getProjectContract(address);
+	return project.getUsers();
+}
+
+export const getNickname = (address, user) => {
+	const project = getProjectContract(address);
+	return project.nickNames(user);
+}
+
+export const setNickname = (address, nickname) => {
+	const project = getProjectContract(address);
+	return project.setNickName(nickname);
+}

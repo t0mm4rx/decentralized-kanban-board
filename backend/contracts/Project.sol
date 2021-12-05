@@ -13,7 +13,7 @@ contract Project {
     Task[] public tasks;
     mapping(uint256 => DoneVote[]) doneVote;
     mapping(uint256 => ValueVote[]) valueVote;
-    mapping(address => string) nickNames;
+    mapping(address => string) public nickNames;
 
     struct ValueVote {
         address voterAddress;

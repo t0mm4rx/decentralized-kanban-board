@@ -48,7 +48,7 @@ contract Project {
         users.push(_owner);
     }
 
-    modifier OnlyUsers() {
+    modifier onlyUsers() {
         require(isUser(msg.sender), "You are not a user of this project");
         _;
     }
@@ -61,7 +61,7 @@ contract Project {
         _;
     }
 
-    modifier OnlyAdmin() {
+    modifier onlyAdmin() {
         require(owner == msg.sender, "You are not admin of this project");
         _;
     }
@@ -111,7 +111,7 @@ contract Project {
         return false;
     }
 
-    function setNickName(string calldata nickName) public OnlyUsers {
+    function setNickName(string calldata nickName) public onlyUsers {
         nickNames[msg.sender] = nickName;
     }
 
@@ -132,7 +132,7 @@ contract Project {
         return cumulativeTaskValue / valueVote[_taskId].length;
     }
 
-    function claimTask(uint256 _taskId) public OnlyUsers returns (bool) {
+    function claimTask(uint256 _taskId) public onlyUsers returns (bool) {
         require(
             tasks[_taskId].assignee == address(0),
             "Task is already claimed"
@@ -157,7 +157,7 @@ contract Project {
         string calldata _name,
         string calldata _description,
         string calldata _category
-    ) public OnlyUsers returns (uint256) {
+    ) public onlyUsers returns (uint256) {
         Task memory newTask = Task({
             id: taskId,
             name: _name,
@@ -200,7 +200,7 @@ contract Project {
         );
     }
 
-    function addUser(address _userAddress) public OnlyAdmin {
+    function addUser(address _userAddress) public onlyAdmin {
         bool isUserAlreadyRegistered = false;
         for (uint256 i = 0; i < users.length; i++) {
             if (users[i] == _userAddress) {
@@ -211,7 +211,7 @@ contract Project {
         users.push(_userAddress);
     }
 
-    function deleteUser(address _userAddress) public OnlyAdmin {
+    function deleteUser(address _userAddress) public onlyAdmin {
         for (uint256 i = 0; i < users.length; i++) {
             if (users[i] == _userAddress) {
                 delete users[i];
@@ -219,7 +219,7 @@ contract Project {
         }
     }
 
-    function voteTaskValue(uint256 _taskId, uint256 _value) public OnlyUsers {
+    function voteTaskValue(uint256 _taskId, uint256 _value) public onlyUsers {
         bool hasUserVoted = false;
         for (uint256 i = 0; i < valueVote[_taskId].length; i++) {
             if (valueVote[_taskId][i].voterAddress == msg.sender) {
@@ -253,7 +253,7 @@ contract Project {
 
     function voteTaskDone(uint256 _taskId)
         public
-        OnlyUsers
+        onlyUsers
         isAssigned(_taskId)
         isDone(_taskId)
     {

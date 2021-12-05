@@ -52,3 +52,25 @@ The ERC-20 will be sent from this contract. All the funds used as rewards should
 - **addUser(user: address)**: adds a user to users
 - **voteTaskValue(index: uint, value: uint)**: adds a new vote in tasks[index].valueVotes
 - **voteTaskDone(index: uint)**: adds a new vote in tasks[index].doneVotes
+
+## Deploy your own infrastructure
+
+### Deploy the factory contract
+
+```sh
+python3 deploy_contracts.sh
+```
+
+### Deploy the frontend
+
+```sh
+cd frontend && yarn build
+```
+
+This will produce a dist/ folder that you can upload wherever you want.
+
+## Launching the frontend in developement
+
+```sh
+cd frontend && yarn serve
+```

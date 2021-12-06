@@ -2,6 +2,8 @@ import requests
 import json
 import os
 
+STARTON_KEY=""
+
 print("Compiling the contracts...")
 os.system("cd backend && npx hardhat compile")
 
@@ -24,7 +26,7 @@ req = requests.post(
 		'name': 'Factory'
 	},
 	headers={
-		'x-api-key': 'pk_13f910956993480fb87511cf5ee4a5a3'
+		'x-api-key': STARTON_KEY
 	}
 )
 print(f"Deployed at {req.json()['address']}")

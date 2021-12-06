@@ -110,7 +110,7 @@
           <span v-if="!highlightedTask.value">To determine</span>
           <span
             class="clickable modal-button"
-            @click="() => voteForValue(highlightedTask)"
+            @click="() => taskToVoteValueFor = highlightedTask"
             v-if="!highlightedTask.isDone"
           >Estimate</span>
           <span
@@ -174,6 +174,16 @@
       </div>
     </div>
   </Modal>
+  <Modal :open="taskToVoteValueFor !== null" :onClose="() => taskToVoteValueFor = null">
+    <h2>Vote for this task value</h2>
+    <div class="label-input-wrapper">
+      <span>Value</span>
+      <div class="input-button-row">
+        <input type="number" id="value-vote" placeholder="50" />
+        <button class="primary-button" @click="voteForValue">vote</button>
+      </div>
+    </div>
+  </Modal>
 </template>
 
 <script>
@@ -195,7 +205,8 @@ export default {
       subscribeMailModal: false,
       usersModal: false,
       users: null,
-      nicknameModal: false
+      nicknameModal: false,
+      taskToVoteValueFor: null
     }
   },
   mounted: function () {
@@ -263,14 +274,15 @@ export default {
         })
         .catch(err => this.$toast.error(`Cannot add user: ${err}`));
     },
-    voteForValue: function (task) {
-      const amount = prompt("How much do you think this task is woth?");
+    voteForValue: function () {
+      const amount = document.querySelector("#value-vote").value;
       if (!amount) {
         return this.$toast.error("Missing value");
       }
-      voteForValue(this.$route.params.id, task.id, amount)
+      voteForValue(this.$route.params.id, this.taskToVoteValueFor.id, amount)
         .then(() => {
-          this.$toast.success("Voted!")
+          this.$toast.success("Voted!");
+          this.taskToVoteValueFor = null;
         })
         .catch(err => this.$toast.error(`Cannot vote: ${err}`));
     },

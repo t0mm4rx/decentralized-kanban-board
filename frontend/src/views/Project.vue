@@ -322,12 +322,13 @@ h1 a {
   width: 100%;
 }
 .avatar {
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   color: #fff;
   margin-left: 10px;
-  font-size: 18px;
+  margin-top: 5px;
+  font-size: 16px;
   display: flex;
   font-weight: 400;
   justify-content: center;

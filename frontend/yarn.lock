@@ -7686,6 +7686,18 @@ scrypt-js@3.0.1:
   resolved "https://registry.yarnpkg.com/scrypt-js/-/scrypt-js-3.0.1.tgz#d314a57c2aef69d1ad98a138a21fe9eafa9ee312"
   integrity sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA==
 
+seed-color@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/seed-color/-/seed-color-2.0.1.tgz#af87a1867a13abf95542d72e7ffdcf09fcb677a1"
+  integrity sha512-SfBpG/n4xbhk8CuykaGgKJXgp+Px1uPdYSOVWgiez6tb7fA7YPf6vMQKyQY7b3Ccbtn8iAoV//pMpFYFTPWnxw==
+  dependencies:
+    seedrandom "2.4.2"
+
+seedrandom@2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-2.4.2.tgz#18d78c41287d13aff8eadb29e235938b248aa9ff"
+  integrity sha1-GNeMQSh9E6/46tsp4jWTiySKqf8=
+
 select-hose@^2.0.0:
   version "2.0.0"
   resolved "https://registry.nlark.com/select-hose/download/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"

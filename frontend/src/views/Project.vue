@@ -23,7 +23,7 @@
       <span
         v-if="project !== null"
         class="header-button clickable"
-        @click="setNickname"
+        @click="() => nicknameModal = true"
       >Get a nickname</span>
       <span
         class="avatar"
@@ -164,6 +164,16 @@
     </div>
     <Loader v-if="!users" />
   </Modal>
+  <Modal :open="nicknameModal" :onClose="() => nicknameModal = false">
+    <h2>Set your username</h2>
+    <div class="label-input-wrapper">
+      <span>Name</span>
+      <div class="input-button-row">
+        <input type="text" id="set-nickname-field" placeholder="Elon" />
+        <button class="primary-button" @click="setNickname">set</button>
+      </div>
+    </div>
+  </Modal>
 </template>
 
 <script>
@@ -184,7 +194,8 @@ export default {
       addUserModal: false,
       subscribeMailModal: false,
       usersModal: false,
-      users: null
+      users: null,
+      nicknameModal: false
     }
   },
   mounted: function () {
@@ -274,12 +285,15 @@ export default {
         .catch(err => this.$toast.error(`Cannot collect reward: ${err}`));
     },
     setNickname: function () {
-      const name = prompt("Enter your name");
+      const name = document.querySelector("#set-nickname-field").value;
       if (!name) {
         return this.$toast.error(`Missing input`);
       }
       setNickname(this.$route.params.id, name)
-        .then(() => this.$toast.success("Set name!"))
+        .then(() => {
+          this.$toast.success("Set name!");
+          this.nicknameModal = false;
+        })
         .catch(err => this.$toast.error(`Cannot set name: ${err}`));
     },
     formatAvatar: function (name) {

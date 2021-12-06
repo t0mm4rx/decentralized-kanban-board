@@ -3,7 +3,7 @@
     <h2>Metamask is not available</h2>
   </Overlay>
   <Overlay :open="!connected">
-    <h2>Please connect your wallet</h2>
+    <h2>Please connect your Polygon wallet</h2>
   </Overlay>
   <router-view v-if="connected" />
 </template>
